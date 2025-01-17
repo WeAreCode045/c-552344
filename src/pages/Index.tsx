@@ -18,6 +18,8 @@ const Index = () => {
   const { toast } = useToast();
 
   const handleSendMessage = async (content: string) => {
+    console.log('handleSendMessage called with:', content);
+    
     if (!content.trim()) {
       toast({
         title: "Error",
@@ -47,15 +49,19 @@ const Index = () => {
 
       setMessages([...newMessages, assistantMessage]);
     } catch (error: any) {
+      console.error('Error in handleSendMessage:', error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "An error occurred",
         variant: "destructive"
       });
     } finally {
       setIsLoading(false);
     }
   };
+
+  console.log('Current messages:', messages);
+  console.log('Is loading:', isLoading);
 
   return (
     <div className="flex h-screen">
