@@ -40,8 +40,10 @@ function chatgpt_interface_page() {
 
 // Enqueue scripts and styles with proper dependencies
 function chatgpt_interface_scripts($hook) {
-    // Only load on plugin page
-    if ($hook !== 'toplevel_page_chatgpt-interface') {
+    // Only load on plugin page or when shortcode is present
+    global $post;
+    if ($hook !== 'toplevel_page_chatgpt-interface' && 
+        (!is_a($post, 'WP_Post') || !has_shortcode($post->post_content, 'chatgpt_interface'))) {
         return;
     }
 
@@ -64,9 +66,26 @@ function chatgpt_interface_scripts($hook) {
     );
 }
 add_action('admin_enqueue_scripts', 'chatgpt_interface_scripts');
+add_action('wp_enqueue_scripts', 'chatgpt_interface_scripts');
 
 // Add shortcode to use in posts/pages
 function chatgpt_interface_shortcode() {
-    return '<div id="chatgpt-interface-root"></div>';
+    // Ensure scripts and styles are loaded
+    chatgpt_interface_scripts('shortcode');
+    
+    // Add GPT Engineer script
+    wp_enqueue_script(
+        'gpt-engineer',
+        'https://cdn.gpteng.co/gptengineer.js',
+        array(),
+        '1.0.0',
+        true
+    );
+    
+    ob_start();
+    ?>
+    <div id="chatgpt-interface-root"></div>
+    <?php
+    return ob_get_clean();
 }
 add_shortcode('chatgpt_interface', 'chatgpt_interface_shortcode');
