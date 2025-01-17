@@ -38,25 +38,30 @@ function chatgpt_interface_page() {
     <?php
 }
 
-// Enqueue scripts and styles
-function chatgpt_interface_scripts() {
+// Enqueue scripts and styles with proper dependencies
+function chatgpt_interface_scripts($hook) {
     // Only load on plugin page
-    if (isset($_GET['page']) && $_GET['page'] === 'chatgpt-interface') {
-        wp_enqueue_script(
-            'chatgpt-interface-js',
-            plugin_dir_url(__FILE__) . 'dist/assets/index.js',
-            array(),
-            '1.0.0',
-            true
-        );
-        
-        wp_enqueue_style(
-            'chatgpt-interface-css',
-            plugin_dir_url(__FILE__) . 'dist/assets/index.css',
-            array(),
-            '1.0.0'
-        );
+    if ($hook !== 'toplevel_page_chatgpt-interface') {
+        return;
     }
+
+    // Deregister conflicting scripts
+    wp_deregister_script('wp-interface');
+    
+    wp_enqueue_script(
+        'chatgpt-interface-js',
+        plugin_dir_url(__FILE__) . 'dist/assets/index.js',
+        array('wp-element'), // Add wp-element as dependency
+        '1.0.0',
+        true
+    );
+    
+    wp_enqueue_style(
+        'chatgpt-interface-css',
+        plugin_dir_url(__FILE__) . 'dist/assets/index.css',
+        array(),
+        '1.0.0'
+    );
 }
 add_action('admin_enqueue_scripts', 'chatgpt_interface_scripts');
 
